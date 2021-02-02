@@ -23,7 +23,7 @@ export TESTSUITEDIR=$PWD
 
 #Load functions
 source utils/helper_functions.sh
-source utils/user_ts_function.sh
+source utils/user_ts_functions.sh
 source utils/internal_ts_functions.sh
 
 #Make sure that projects directory exists
@@ -59,10 +59,9 @@ else
         mkdir projects/$PROJECT_NAME/ref
         mkdir projects/$PROJECT_NAME/log
 
-        read -p "Please enter custom CMSSW build if required:" -r
-        if [[ -z $REPLY ]]; then
-            export CMSSW_BUILD=CMSSW_11_1_X_$(date -d "yesterday" +"%Y-%m-%d")-2300
-        else
+        export CMSSW_BUILD=CMSSW_11_3_X_$(date -d "yesterday" +"%Y-%m-%d")-2300
+        read -p "Please enter custom CMSSW build if required (default=${CMSSW_BUILD}):" -r
+        if [[ ! -z $REPLY ]]; then
             export CMSSW_BUILD=$REPLY
         fi
         _ts_setup_cmssw
@@ -108,6 +107,7 @@ else
         else
             logerror "Remote fork $CMSSW_REMOTE is not available! Use ts_set_remote to switch to a different remote."
             export CMSSW_REMOTE=INVALID
+            export CMSSW_BRANCH=INVALID
         fi
 
         _ts_save_metadata
