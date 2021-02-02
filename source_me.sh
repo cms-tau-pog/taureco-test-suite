@@ -33,10 +33,12 @@ source utils/internal_ts_functions.sh
 if [ -d projects/$PROJECT_NAME ]; then
     source projects/$PROJECT_NAME/project_metadata.sh
     cd projects/$PROJECT_NAME/dev/$CMSSW_BUILD/src
-    cmsenv
+    #workaround for checking that cmsenv alias scramv1 works and build is not deprecated. (because it always returns 0)
+    scramv1 runtime -sh | grep SRT_CMSSW_VERSION_SCRAMRTDEL > /dev/null
     if [[ $? -ne 0 ]]; then
-        #CURRENT CMSENV ALWAYS RETURNS 0 AND THIS MESSAGE WONT SHOW UP.
-        logerror "Setting up CMSSW failed. Your current build might be outdated (check above). If this is the case, you may want to run ts_checkout_new_cmssw_build in order to check out a new build and transfer your local developments."
+        logerror "Setting up CMSSW failed. Your current build is probably outdated (check above). If this is the case, you may want to run ts_checkout_new_cmssw_build in order to check out a new build and transfer your local developments."
+    else
+        cmsenv #corresponds to an eval of the upper command which is necessary to get the environment variables
     fi
 
     #check remote and branch
