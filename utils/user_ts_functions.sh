@@ -114,6 +114,10 @@ function ts_test_code_checks {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
     scram b -j 20
+    if [[ $? -ne 0 ]]; then
+        logerrormsg "Compilation failed!"
+        return 1
+    fi
     scram b code-format
     scram b code-checks
 }
@@ -121,24 +125,50 @@ function ts_test_code_checks {
 function ts_test_unit {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
+    LOGTAG=$1
+    if [[ -z $LOGTAG ]]; then
+        LOGTAG=$(date +%Y-%m-%d_%H-%M)
+    fi
+
     scram b -j 20
+    if [[ $? -ne 0 ]]; then
+        logerrormsg "Compilation failed!"
+        return 1
+    fi
     export CMS_PATH=/cvmfs/cms-ib.cern.ch/week0
-    scram b runtests
+    logandrun 'scram b runtests' $TESTSUITEDIR/projects/$PROJECT_NAME/log/unit-tests_${LOGTAG}
+    loginfo "Unit tests finished. Please check results in $TESTSUITEDIR/projects/$PROJECT_NAME/log/unit-tests_${LOGTAG}.log"
 }
 
 function ts_test_matrix {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
+    LOGTAG=$1
+    if [[ -z $LOGTAG ]]; then
+        LOGTAG=$(date +%Y-%m-%d_%H-%M)
+    fi
+
     ts_check_proxy
     scram b -j 20
-    runTheMatrix.py -l limited -i all --ibeos
+    if [[ $? -ne 0 ]]; then
+        logerrormsg "Compilation failed!"
+        return 1
+    fi
+    logandrun 'runTheMatrix.py -l limited -i all --ibeos' $TESTSUITEDIR/projects/$PROJECT_NAME/log/matrix-tests_${LOGTAG}
+    loginfo "Matrix tests finished. Please check results in $TESTSUITEDIR/projects/$PROJECT_NAME/log/matrix-tests_${LOGTAG}.log"
 }
 
 function ts_test_standard_sequence {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
+    LOGTAG=$1
+    if [[ -z $LOGTAG ]]; then
+        LOGTAG=$(date +%Y-%m-%d_%H-%M)
+    fi
+
     ts_check_proxy
     ts_test_code_checks
-    ts_test_unit
-    ts_test_matrix
+    ts_test_unit $LOGTAG
+    ts_test_matrix $LOGTAG
+    loginfo "Standard test sequence finished. Please check results in \n $TESTSUITEDIR/projects/$PROJECT_NAME/log/unit-tests_${LOGTAG}.log \n $TESTSUITEDIR/projects/$PROJECT_NAME/log/matrix-tests_${LOGTAG}.log"
 }
