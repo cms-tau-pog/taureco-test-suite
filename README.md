@@ -24,7 +24,7 @@ The provided user commands are listed after the sourcing. They all begin `ts_` s
 * `ts_set_remote <GITHUBREMOTE>` : Set the project remote and fetch it.
 * `ts_set_remote <BRANCH>` : Set the project branch. If the branch already exists locally, git checks out this one, otherwise it tries to get it from the project remote.
 * `ts_rebase_to_master` : Fetch CMSSW master and rebase current branch to it, which might be necessary for avoiding merge conflicts. The inclusion of recent commits from master may cause compilation failures in your current setup. In this case you can use `ts_checkout_new_cmssw_build` to switch to the latest nightly build.
-* `ts_backport` : Creates a new project in order to prepare a backport branch. You will be asked for the CMSSW release that you want to reside on. The backport project is set up with the same other settings as the original projects. A backport branch is created and the commit from the original development are automatically cherry-picked. You might have to resolve merge conflicts by hand.
+* `ts_backport` : Creates a new project in order to prepare a backport branch. You will be asked for the CMSSW release that you want to reside on. The backport project is set up with the same other settings as the original projects. A backport branch is created and the commits from the original development are automatically cherry-picked. You might have to resolve merge conflicts by hand.
 
 ## Testing
 ### Mandatory integration tests
