@@ -43,6 +43,52 @@ function ts_project_data {
     fi
 }
 
+function ts_set_remote {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+
+    if [[ -z $1 ]]; then
+        logwarn "Call me with name of remote owner!"
+        return 1
+    fi
+
+    _ts_env_dev
+    git remote | grep $1 > /dev/null
+    if [[ $? -ne 0 ]]; then
+        git remote add $1 git@github.com:${1}/cmssw.git
+    fi
+    loginfo "Fetching contents from remote. Credentials required!"
+    git fetch $CMSSW_REMOTE
+    if [[ $? -ne 0 ]]; then
+        logerror "Remote fork $1 is not available! Use ts_set_remote to switch to a different remote."
+        return 1
+    fi
+    export CMSSW_REMOTE=$1
+    _ts_save_metadata
+}
+
+function ts_set_branch {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+
+    if [[ -z $1	]]; then
+        logwarn "Call me with branch name!"
+        return 1
+    fi
+
+    _ts_env_dev
+    git	branch | grep $1 > /dev/null
+    if [[ $? -eq 0 ]]; then
+        git checkout $1
+    else
+        git checkout --track $CMSSW_REMOTE/$1
+        if [[ $? -ne 0 ]]; then
+            logerror "Branch $1 not available on ${CMSSW_REMOTE}! Use ts_set_branch to switch to a different branch."
+            return 1
+        fi
+    fi
+    export CMSSW_BRANCH=$1
+    _ts_save_metadata
+}
+
 function ts_add_package {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
