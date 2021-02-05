@@ -172,3 +172,82 @@ function ts_test_standard_sequence {
     ts_test_matrix $LOGTAG
     loginfo "Standard test sequence finished. Please check results in \n $TESTSUITEDIR/projects/$PROJECT_NAME/log/unit-tests_${LOGTAG}.log \n $TESTSUITEDIR/projects/$PROJECT_NAME/log/matrix-tests_${LOGTAG}.log"
 }
+
+function ts_rebase_to_master {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+
+    _ts_env_dev
+    loginfo "Fetching contents from official master. Credentials required!"
+    git fetch official-cmssw
+    git rebase official-cmssw/master
+}
+
+function ts_backport {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+
+    _ts_env_dev
+
+    loginfo "Checking sync status of current project. Credentials required!"
+    git fetch $CMSSW_REMOTE
+    git status | grep "Your branch is up to date with" > /dev/null
+    if [[ $? -ne 0 ]]; then
+        logwarn "Please synchronize your local repository with the remote first and try again! Aborting backport..."
+        return 1
+    fi
+    #identify range of commits to backport and write it to logfile
+    BASE_COMMIT=$(git rev-list --max-count 1 --min-parents=2 $CMSSW_BRANCH)
+    LAST_COMMIT=$(git rev-list --max-count 1 $CMSSW_BRANCH)
+    for ENTRY in $(git rev-list --max-count 100 $CMSSW_BRANCH); do
+        if [[ $ENTRY == $BASE_COMMIT ]]; then
+            break
+        else
+            echo $ENTRY
+        fi
+    done > $TESTSUITEDIR/projects/$PROJECT_NAME/log/original_commits_of_backport_temp.txt
+
+    read -p "Please enter CMSSW build to backport to:" -r
+    echo
+
+    cd $TESTSUITEDIR
+    if [ -d projects/${PROJECT_NAME}_backport_$REPLY ]; then
+        logwarn "Backport project already exists! Aborting backport..."
+        rm $TESTSUITEDIR/projects/$PROJECT_NAME/log/original_commits_of_backport_temp.txt
+        return 1
+    fi
+
+    export CMSSW_BUILD=${REPLY}
+    export BACKPORT_BASE=$PROJECT_NAME
+    export PROJECT_NAME=${PROJECT_NAME}_backport_$CMSSW_BUILD
+
+    loginfo "Creating backport project $PROJECT_NAME ..."
+    mkdir projects/$PROJECT_NAME
+    mkdir projects/$PROJECT_NAME/dev
+    mkdir projects/$PROJECT_NAME/ref
+    mkdir projects/$PROJECT_NAME/log
+    mv $TESTSUITEDIR/projects/$BACKPORT_BASE/log/original_commits_of_backport_temp.txt $TESTSUITEDIR/projects/$PROJECT_NAME/log/original_commits_of_backport.txt
+    _ts_setup_cmssw
+    if [[ $? -ne 0 ]]; then
+        logwarn "Aborting backport..."
+        cd $TESTSUITEDIR
+        rm -rf $TESTSUITEDIR/projects/$PROJECT_NAME
+        export PROJECT_NAME=$BACKPORT_BASE
+        source $TESTSUITEDIR/projects/$BACKPORT_BASE/project_metadata.sh
+        return 1
+    fi
+
+    loginfo "Setting up local code packages..."
+    git cms-init
+    for PACKAGE in $CMSSW_PACKAGES; do
+        git cms-addpkg $PACKAGE
+    done
+    export CMSSW_BRANCH=${CMSSW_BUILD}_backport_$CMSSW_BRANCH
+    git checkout -b $CMSSW_BRANCH
+
+    _ts_save_metadata
+
+    git remote add $CMSSW_REMOTE git@github.com:${CMSSW_REMOTE}/cmssw.git
+    loginfo "Fetching contents from remote. Credentials required!"
+    git fetch $CMSSW_REMOTE
+    loginfo "Start cherry-picking commits to be backported... List of commits is written to $TESTSUITEDIR/projects/$PROJECT_NAME/log/original_commits_of_backport.txt"
+    git cherry-pick ${BASE_COMMIT}..${LAST_COMMIT}
+}

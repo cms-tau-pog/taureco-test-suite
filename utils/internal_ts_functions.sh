@@ -2,6 +2,18 @@
 
 #Use 'function _ts_<FUNCTION>() {}' for internal functions.
 
+function _ts_env_dev {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    cd $TESTSUITEDIR/projects/$PROJECT_NAME/dev/$CMSSW_BUILD/src
+    cmsenv
+}
+
+function _ts_env_ref {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    cd $TESTSUITEDIR/projects/$PROJECT_NAME/ref/$CMSSW_BUILD/src
+    cmsenv
+}
+
 function _ts_setup_cmssw {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
@@ -18,8 +30,7 @@ function _ts_setup_cmssw {
             fi
         fi
     done
-    cd $TESTSUITEDIR/projects/$PROJECT_NAME/dev/$CMSSW_BUILD/src
-    cmsenv
+    _ts_env_dev
 }
 
 function _ts_save_metadata() {
@@ -28,5 +39,6 @@ function _ts_save_metadata() {
     (echo "export CMSSW_BUILD=$CMSSW_BUILD" &&
     echo "export CMSSW_PACKAGES='$CMSSW_PACKAGES'" &&
     echo "export CMSSW_REMOTE=$CMSSW_REMOTE" &&
-    echo "export CMSSW_BRANCH=$CMSSW_BRANCH") > $TESTSUITEDIR/projects/$PROJECT_NAME/project_metadata.sh
+    echo "export CMSSW_BRANCH=$CMSSW_BRANCH" &&
+    echo "export BACKPORT_BASE=$BACKPORT_BASE") > $TESTSUITEDIR/projects/$PROJECT_NAME/project_metadata.sh
 }
