@@ -101,7 +101,7 @@ else
         loginfo "Fetching contents from remote. Credentials required!"
         git fetch $CMSSW_REMOTE
         if [[ $? -eq 0 ]]; then
-            git checkout --track $CMSSW_BRANCH
+            git checkout --track $CMSSW_REMOTE/$CMSSW_BRANCH
             if [[ $? -ne 0 ]]; then
                 logerror "Branch $CMSSW_BRANCH not available on ${CMSSW_REMOTE}! Use ts_set_branch to switch to a different branch."
                 export CMSSW_BRANCH=INVALID
