@@ -61,7 +61,7 @@ function ts_set_remote {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
     if [[ -z $1 ]]; then
-        logwarn "Call me with name of remote owner!"
+        logattn "Call me with name of remote owner!"
         return 1
     fi
 
@@ -70,7 +70,7 @@ function ts_set_remote {
     if [[ $? -ne 0 ]]; then
         git remote add $1 git@github.com:${1}/cmssw.git
     fi
-    loginfo "Fetching contents from remote. Credentials required!"
+    logattn "Fetching contents from remote. Credentials required!"
     git fetch $TS_CMSSW_REMOTE
     if [[ $? -ne 0 ]]; then
         logerror "Remote fork $1 is not available! Use ts_set_remote to switch to a different remote."
@@ -84,7 +84,7 @@ function ts_set_branch {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
     if [[ -z $1	]]; then
-        logwarn "Call me with branch name!"
+        logattn "Call me with branch name!"
         return 1
     fi
 
@@ -175,7 +175,7 @@ function ts_test_code_checks {
 
     scram b -j 20
     if [[ $? -ne 0 ]]; then
-        logerrormsg "Compilation failed!"
+        logerror "Compilation failed!"
         return 1
     fi
     scram b code-format
@@ -192,7 +192,7 @@ function ts_test_unit {
 
     scram b -j 20
     if [[ $? -ne 0 ]]; then
-        logerrormsg "Compilation failed!"
+        logerror "Compilation failed!"
         return 1
     fi
     export CMS_PATH=/cvmfs/cms-ib.cern.ch/week0
@@ -211,7 +211,7 @@ function ts_test_matrix {
     ts_check_proxy
     scram b -j 20
     if [[ $? -ne 0 ]]; then
-        logerrormsg "Compilation failed!"
+        logerror "Compilation failed!"
         return 1
     fi
     logandrun 'runTheMatrix.py -l limited -i all --ibeos' $TS_DIR/projects/$TS_PROJECT_NAME/log/matrix-tests_${LOGTAG}
@@ -237,7 +237,7 @@ function ts_rebase_to_master {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
     _ts_env_dev
-    loginfo "Fetching contents from official master. Credentials required!"
+    logattn "Fetching contents from official master. Credentials required!"
     git fetch official-cmssw
     git rebase official-cmssw/master
 }
@@ -250,14 +250,14 @@ function ts_backport {
     #Check alignment of git branch with TS remote and branch
     git branch -vv | grep "$TS_CMSSW_BRANCH.*$TS_CMSSW_REMOTE/$TS_CMSSW_BRANCH" > /dev/null
     if [[ $? -ne 0 ]]; then
-        logwarn "Active branch and tracked remote are not aligned with project branch and remote. Please restore this! Aborting backport..."
+        logattn "Active branch and tracked remote are not aligned with project branch and remote. Please restore this! Aborting backport..."
         return 1
-    }
-    loginfo "Checking sync status of current project. Credentials required!"
+    fi
+    logattn "Checking sync status of current project. Credentials required!"
     git fetch $TS_CMSSW_REMOTE
     git status | grep "Your branch is up to date with" > /dev/null
     if [[ $? -ne 0 ]]; then
-        logwarn "Please synchronize your local repository with the remote first and try again! Aborting backport..."
+        logattn "Please synchronize your local repository with the remote first and try again! Aborting backport..."
         return 1
     fi
     #identify range of commits to backport and write it to logfile
@@ -313,7 +313,7 @@ function ts_backport {
     _ts_save_metadata
 
     git remote add $TS_CMSSW_REMOTE git@github.com:${TS_CMSSW_REMOTE}/cmssw.git
-    loginfo "Fetching contents from remote. Credentials required!"
+    logattn "Fetching contents from remote. Credentials required!"
     git fetch $TS_CMSSW_REMOTE
     loginfo "Start cherry-picking commits to be backported... List of commits is written to $TS_DIR/projects/$TS_PROJECT_NAME/log/original_commits_of_backport.txt"
     git cherry-pick ${BASE_COMMIT}..${LAST_COMMIT}
