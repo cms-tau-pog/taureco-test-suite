@@ -247,6 +247,12 @@ function ts_backport {
 
     _ts_env_dev
 
+    #Check alignment of git branch with TS remote and branch
+    git branch -vv | grep "$TS_CMSSW_BRANCH.*$TS_CMSSW_REMOTE/$TS_CMSSW_BRANCH" > /dev/null
+    if [[ $? -ne 0 ]]; then
+        logwarn "Active branch and tracked remote are not aligned with project branch and remote. Please restore this! Aborting backport..."
+        return 1
+    }
     loginfo "Checking sync status of current project. Credentials required!"
     git fetch $TS_CMSSW_REMOTE
     git status | grep "Your branch is up to date with" > /dev/null
@@ -255,10 +261,11 @@ function ts_backport {
         return 1
     fi
     #identify range of commits to backport and write it to logfile
-    BASE_COMMIT=$(git rev-list --max-count 1 --min-parents=2 $TS_CMSSW_BRANCH)
+    #BASE_COMMIT=$(git rev-list --max-count 1 --min-parents=2 $TS_CMSSW_BRANCH) #not good because merge commits may be present in dev
     LAST_COMMIT=$(git rev-list --max-count 1 $TS_CMSSW_BRANCH)
     for ENTRY in $(git rev-list --max-count 100 $TS_CMSSW_BRANCH); do
-        if [[ $ENTRY == $BASE_COMMIT ]]; then
+        if [[ $(git log -1 --format='%ae' $ENTRY) =~ 'cmsbuild' ]]; then
+            BASE_COMMIT=$ENTRY
             break
         else
             echo $ENTRY
