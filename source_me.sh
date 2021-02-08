@@ -42,11 +42,11 @@ if [ -d projects/$PROJECT_NAME ]; then
     fi
 
     #check remote and branch
-    git remote | grep $CMSSW_REMOTE > /dev/null
+    git remote | grep "^$CMSSW_REMOTE$" > /dev/null
     if [[ $? -ne 0 ]]; then
         logwarn "Project remote is not registered in git of current setup!"
     fi
-    git branch | grep "* $CMSSW_BRANCH" > /dev/null
+    git branch | grep "^* $CMSSW_BRANCH$" > /dev/null
     if [[ $? -ne 0 ]]; then
        	logwarn "The branch currently checked out differs from the project branch!"
     fi
