@@ -11,6 +11,20 @@ function ts_active_project {
     fi
 }
 
+function ts_go_to_top {
+    cd $TS_DIR
+}
+
+function ts_go_to_dev {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    cd $TS_DIR/projects/$TS_PROJECT_NAME/dev/$TS_CMSSW_BUILD/src
+}
+
+function ts_go_to_ref {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    cd $TS_DIR/projects/$TS_PROJECT_NAME/ref/$TS_CMSSW_BUILD/src
+}
+
 function ts_delete {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 

@@ -3,14 +3,12 @@
 #Use 'function _ts_<FUNCTION>() {}' for internal functions.
 
 function _ts_env_dev {
-    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
-    cd $TS_DIR/projects/$TS_PROJECT_NAME/dev/$TS_CMSSW_BUILD/src
+    ts_go_to_dev; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
     cmsenv
 }
 
 function _ts_env_ref {
-    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
-    cd $TS_DIR/projects/$TS_PROJECT_NAME/ref/$TS_CMSSW_BUILD/src
+    ts_go_to_ref; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
     cmsenv
 }
 

@@ -16,6 +16,9 @@ The provided user commands are listed after the sourcing. They all begin `ts_` s
 ## Basic commands
 * `ts_active_project` : Print the name of the project you are currently working on.
 * `ts_project_data` : Print the meta data of your project like remote, branch, CMSSW packages...
+* `ts_go_to_top` : cd to test suite base directory.
+* `ts_go_to_dev` : cd to development CMSSW src directory.
+* `ts_go_to_ref` : cd to reference CMSSW src directory.
 * `ts_delete` : Remove the current project.
 
 ## Manage builds, packages, branches, backports
