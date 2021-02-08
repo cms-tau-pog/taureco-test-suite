@@ -119,7 +119,7 @@ function ts_add_package {
     return $RETURNCODE
 }
 
-function ts_checkout_new_CMSSW_BUILD {
+function ts_checkout_new_cmssw_build {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
     #set up new cmssw build
