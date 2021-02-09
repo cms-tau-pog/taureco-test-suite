@@ -365,9 +365,10 @@ function ts_backport {
 
     read -p "Please enter CMSSW build to backport to:" -r
     echo
+    BACKPORT_CMSSW=${REPLY%X*}X
 
     cd $TS_DIR
-    if [ -d projects/${TS_PROJECT_NAME}_backport_$REPLY ]; then
+    if [ -d projects/${TS_PROJECT_NAME}_backport_$BACKPORT_CMSSW ]; then
         logwarn "Backport project already exists! Aborting backport..."
         rm $TS_DIR/projects/$TS_PROJECT_NAME/log/original_commits_of_backport_temp.txt
         return 1
@@ -375,7 +376,7 @@ function ts_backport {
 
     export TS_CMSSW_BUILD=${REPLY}
     export TS_BACKPORT_BASE=$TS_PROJECT_NAME
-    export TS_PROJECT_NAME=${TS_PROJECT_NAME}_backport_$TS_CMSSW_BUILD
+    export TS_PROJECT_NAME=${TS_PROJECT_NAME}_backport_$BACKPORT_CMSSW
 
     loginfo "Creating backport project $TS_PROJECT_NAME ..."
     mkdir projects/$TS_PROJECT_NAME
@@ -398,7 +399,7 @@ function ts_backport {
     for PACKAGE in $TS_CMSSW_PACKAGES; do
         git cms-addpkg $PACKAGE
     done
-    export TS_CMSSW_BRANCH=${TS_CMSSW_BUILD}_backport_$TS_CMSSW_BRANCH
+    export TS_CMSSW_BRANCH=${BACKPORT_CMSSW}_backport_$TS_CMSSW_BRANCH
     git checkout -b $TS_CMSSW_BRANCH
 
     _ts_save_metadata
