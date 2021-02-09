@@ -22,7 +22,7 @@ The provided user commands are listed after the sourcing. They all begin `ts_` s
 * `ts_delete` : Remove the current project.
 
 ## Manage builds, packages, branches, backports
-* `ts_checkout_new_cmssw_build` : Sets up another CMSSW build with the same configuration of packages and branches, then copies you local changes. Future test suite operations will run on the new build. The old build is kept. You can delete it by hand as soon as you are sure that everything is working well with the new build. -  This function is particularly useful if you are working with nightly builds that expire after some time.
+* `ts_checkout_new_cmssw_build` : Sets up another CMSSW build with the same configuration of packages and branches, then copies your local changes. Future test suite operations will run on the new build. The old build is kept. You can delete it by hand as soon as you are sure that everything is working well with the new build. -  This function is particularly useful if you are working with nightly builds that expire after some time.
 * `ts_add_package <SUBSYSTEM/PACKAGE>` : Add a new CMSSW package to the project.
 * `ts_set_remote <GITHUBREMOTE>` : Set the project remote and fetch it.
 * `ts_set_remote <BRANCH>` : Set the project branch. If the branch already exists locally, git checks out this one, otherwise it tries to get it from the project remote.
