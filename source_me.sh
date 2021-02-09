@@ -61,6 +61,7 @@ else
         mkdir projects/$TS_PROJECT_NAME/dev
         mkdir projects/$TS_PROJECT_NAME/ref
         mkdir projects/$TS_PROJECT_NAME/log
+        mkdir projects/$TS_PROJECT_NAME/test
 
         export TS_CMSSW_BUILD=CMSSW_11_3_X_$(date -d "yesterday" +"%Y-%m-%d")-2300
         read -p "Please enter custom CMSSW build if required (default=${TS_CMSSW_BUILD}):" -r

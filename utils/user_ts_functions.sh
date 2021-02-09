@@ -383,6 +383,7 @@ function ts_backport {
     mkdir projects/$TS_PROJECT_NAME/dev
     mkdir projects/$TS_PROJECT_NAME/ref
     mkdir projects/$TS_PROJECT_NAME/log
+    mkdir projects/$TS_PROJECT_NAME/test
     mv $TS_DIR/projects/$TS_BACKPORT_BASE/log/original_commits_of_backport_temp.txt $TS_DIR/projects/$TS_PROJECT_NAME/log/original_commits_of_backport.txt
     _ts_setup_cmssw
     if [[ $? -ne 0 ]]; then
