@@ -37,8 +37,19 @@ The integration tests that are required for any CMSSW code integration can be la
     * `ts_test_unit` : Run unit tests.
     * `ts_test_matrix` : Run matrix tests (limited).
 
-### Other tests
-Yet to come...
+### Custom tests
+Further test sequences are provided in the directory `test` and you can add your own tests as well. A test sequence is launched by calling `ts_test_custom <TESTNAME>` and is typically devided into three parts with the corresponding shell scripts:
+* Preparation of a local input sample (processing files from the database, which can take a bit longer and should not be repeated every time). This part is defined in `test/<TESTNAME>_prep.sh`. It is not mandatory and is skipped automatically if the file does not exist. It is also skipped automatically if it was run before and a corresponding log-file is found. --
+This part of the sequence can be run individually via `ts_test_custom_prep <TESTNAME>`
+* Running the sequence that is potentially changed by the development. It is hence run with both the reference and the development setup. This part is defined in `test/<TESTNAME>_test.sh`. --
+This part of the sequence can be run individually via `ts_test_custom_dev <TESTNAME>` and `ts_test_custom_ref <TESTNAME>`
+* Comparison of the resulting outputs (ref vs. dev). This part is defined in `test/<TESTNAME>_comp.sh`. It is not mandatory and is skipped automatically if the file does not exist. --
+This part of the sequence can be run individually via `ts_test_custom_comp <TESTNAME>`
+
+The tests are operating in the following directory where you will find the output files: `projects/<PROJECT>/test/`.
+Logfiles are written to `projects/<PROJECT>/log/` as usual.
+
+The available tests can be displayed via `ts_list_custom_tests`.
 
 ## Grid proxy
 The test suite will automatically check your grid proxy when necessary, but you may want to use one of the following commands before directly launching CMSSW.
