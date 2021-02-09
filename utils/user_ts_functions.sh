@@ -159,6 +159,7 @@ function ts_new_proxy {
 }
 
 function ts_check_proxy {
+    loginfo "Checking voms proxy status:"
     voms-proxy-info
     if [[ $? -eq 0 ]]; then
         TIMELEFT=$(voms-proxy-info | grep -E 'timeleft' | sed "s@timeleft  : @@")
@@ -231,6 +232,96 @@ function ts_test_standard_sequence {
     ts_test_unit $LOGTAG
     ts_test_matrix $LOGTAG
     loginfo "Standard test sequence finished. Please check results in \n $TS_DIR/projects/$TS_PROJECT_NAME/log/unit-tests_${LOGTAG}.log \n $TS_DIR/projects/$TS_PROJECT_NAME/log/matrix-tests_${LOGTAG}.log"
+}
+
+function ts_list_custom_tests {
+    (cd $TS_DIR/test && ls *test.sh | sed "s@_test.sh@@")
+}
+
+function ts_test_custom_prep {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    if [[ -z $1 ]]; then
+        logattn "Call me with test name! The following custom tests are available"
+        ts_list_custom_tests
+        return 1
+    fi
+    if [[ -f $TS_DIR/test/${1}_prep.sh ]]; then
+        _ts_env_ref
+        ts_check_proxy
+        cd $TS_DIR/projects/$TS_PROJECT_NAME/test
+        logandrun "bash $TS_DIR/test/${1}_prep.sh" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_prep.log
+        _ts_env_dev
+    else
+        logwarn "No preparation task available for test ${1}. Skipping it..."
+    fi
+}
+
+function ts_test_custom_ref {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    if [[ -z $1 ]]; then
+        logattn "Call me with test name! The following custom tests are available"
+        ts_list_custom_tests
+        return 1
+    fi
+    if [[ -f $TS_DIR/test/${1}_test.sh ]]; then
+        _ts_env_ref
+        cd $TS_DIR/projects/$TS_PROJECT_NAME/test
+        logandrun "bash $TS_DIR/test/${1}_test.sh ref" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_ref.log
+        _ts_env_dev
+    else
+        logerror "Test $1 is not available!"
+        return 1
+    fi
+}
+
+function ts_test_custom_dev {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    if [[ -z $1 ]]; then
+        logattn "Call me with test name! The following custom tests are available"
+        ts_list_custom_tests
+        return 1
+    fi
+    if [[ -f $TS_DIR/test/${1}_test.sh ]]; then
+        _ts_env_dev
+        cd $TS_DIR/projects/$TS_PROJECT_NAME/test
+        logandrun "bash $TS_DIR/test/${1}_test.sh dev" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_dev.log
+        _ts_env_dev
+    else
+        logerror "Test $1 is not available!"
+        return 1
+    fi
+}
+
+function ts_test_custom_comp {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    if [[ -z $1 ]]; then
+        logattn "Call me with test name! The following custom tests are available"
+        ts_list_custom_tests
+        return 1
+    fi
+    if [[ -f $TS_DIR/test/${1}_comp.sh ]]; then
+        cd $TS_DIR/projects/$TS_PROJECT_NAME/test
+        logandrun "bash $TS_DIR/test/${1}_comp.sh" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_comp.log
+    else
+        logwarn "No comparison task available for test ${1}. Skipping it..."
+    fi
+}
+
+function ts_test_custom {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    if [[ -z $1 ]]; then
+        logattn "Call me with test name! The following custom tests are available"
+        ts_list_custom_tests
+        return 1
+    fi
+    ts_test_custom_prep $1
+    ts_test_custom_dev $1
+    if [[ -f $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_ref.log ]]; then
+        logwarn "Logfile of reference already exists. Skipping reproduction of reference."
+    else
+        ts_test_custom_ref $1
+    fi
+    ts_test_custom_comp $1
 }
 
 function ts_rebase_to_master {

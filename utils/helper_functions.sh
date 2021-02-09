@@ -1,16 +1,16 @@
 # colored output for viewing logs
 LESS=-R
 function loginfo {
-    echo -e "\e[46m[INFO]\e[0m" $( date +"%y-%m-%d %R" ): $@ #| tee -a $( pwd )/output/log/logandrun/event.log
+    echo -e "\e[46m[INFO]\e[0m" $( date +"%y-%m-%d %R" ): $@
 }
 function logwarn {
-    echo -e "\e[45m[WARN]\e[0m" $( date +"%y-%m-%d %R" ): $@ #| tee -a $( pwd )/output/log/logandrun/event.log
+    echo -e "\e[45m[WARN]\e[0m" $( date +"%y-%m-%d %R" ): $@
 }
 function logattn {
-    echo -e "\e[43m[ATTN]\e[0m" $( date +"%y-%m-%d %R" ): $@ #| tee -a $( pwd )/output/log/logandrun/event.log
+    echo -e "\e[43m[ATTN]\e[0m" $( date +"%y-%m-%d %R" ): $@
 }
 function logerrormsg {
-    echo -e "\e[41m[ERROR]\e[0m" $( date +"%y-%m-%d %R" ): $@ #| tee -a $( pwd )/output/log/logandrun/event.log
+    echo -e "\e[41m[ERROR]\e[0m" $( date +"%y-%m-%d %R" ): $@
 }
 function logerror {
     logerrormsg $@
@@ -27,7 +27,7 @@ function logandrun() { #first argument=command; second argument=logfilename
     # set the name of the logfile based on the command
     logfile=${2}.log
     # print the startmessage and log it
-    echo -e "\e[43m[RUN]\e[0m" $( date +"%y-%m-%d %R" ): $1 | tee -a $( pwd )/output/log/logandrun/event.log | tee -a $logfile
+    echo -e "\e[44m[RUN]\e[0m" $( date +"%y-%m-%d %R" ): $1 | tee $logfile
     # evaluate the current date in seconds as the start date
     start=`date +%s`
     #######
@@ -42,10 +42,10 @@ function logandrun() { #first argument=command; second argument=logfilename
     # if the there was no error...
     if [[ $return_code == 0 ]]; then
         # print the message and log it
-        echo -e "\e[42m[COMPLETE]\e[0m" $( date +"%y-%m-%d %R" ): $1 "     \e[104m{$((end-start))s}\e[0m" | tee -a $( pwd )/output/log/logandrun/event.log | tee -a $logfile
+        echo -e "\e[42m[COMPLETE]\e[0m" $( date +"%y-%m-%d %R" ): $1 "     \e[104m{$((end-start))s}\e[0m" | tee -a $logfile
     else
         # print a message with the return code
-        logerrormsg Error Code $return_code  $1 "     \e[104m{$((end-start))s}\e[0m"  | tee -a $( pwd )/output/log/logandrun/event.log | tee -a $logfile
+        logerrormsg Error Code $return_code  $1 "     \e[104m{$((end-start))s}\e[0m"  | tee -a $logfile
     fi
     if [[ $LOGANDRUN_IS_TOP_LEVEL==1 ]]; then
         unset LOGANDRUN_TOPLEVELSET
