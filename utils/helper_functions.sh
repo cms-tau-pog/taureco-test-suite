@@ -33,9 +33,9 @@ function logandrun() { #first argument=command; second argument=logfilename
     #######
     # execute the command and log it
     (
-    $1 2>&1 |  tee -a $logfile
+    set -o pipefail && $1 2>&1 |  tee -a $logfile
     )
-    # capture the return code ( without  pipefail this would be the exit code of tee )
+    # capture the return code
     return_code=$?
     end=`date +%s`
     # evaluate the end data
