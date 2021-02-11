@@ -99,7 +99,10 @@ else
                 logwarn "CMSSW package $PACKAGE could not be added. Removed it from list. Run 'add_package <SUBSYSTEM/PACKAGE> to try again."
             fi
         done
-        git remote add $TS_CMSSW_REMOTE git@github.com:${TS_CMSSW_REMOTE}/cmssw.git
+        git remote | grep $1 > /dev/null
+        if [[ $? -ne 0 ]]; then
+            git remote add $TS_CMSSW_REMOTE git@github.com:${TS_CMSSW_REMOTE}/cmssw.git
+        fi
         logattn "Fetching contents from remote. Credentials required!"
         git fetch $TS_CMSSW_REMOTE
         if [[ $? -eq 0 ]]; then
