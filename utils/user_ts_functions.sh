@@ -155,6 +155,7 @@ function ts_checkout_new_cmssw_build {
 }
 
 function ts_new_proxy {
+    logattn "Initializing new voms proxy. Credentials required!"
     voms-proxy-init -rfc -voms cms
 }
 
