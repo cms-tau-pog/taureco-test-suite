@@ -41,7 +41,7 @@ The integration tests that are required for any CMSSW code integration can be la
 Further test sequences are provided in the directory `test` and you can add your own tests as well. A test sequence is launched by calling `ts_test_custom <TESTNAME>` and is typically devided into three parts with the corresponding shell scripts:
 * Preparation of a local input sample (processing files from the database, which can take a bit longer and should not be repeated every time). This part is defined in `test/<TESTNAME>_prep.sh`. It is not mandatory and is skipped automatically if the file does not exist. It is also skipped automatically if it was run before and a corresponding log-file is found. --
 This part of the sequence can be run individually via `ts_test_custom_prep <TESTNAME>`
-* Running the sequence that is potentially changed by the development. It is hence run with both the reference and the development setup. This part is defined in `test/<TESTNAME>_test.sh`. --
+* Running the sequence that is potentially changed by the development. It is hence run with both the reference and the development setup. This part is defined in `test/<TESTNAME>_test.sh`. The reference is not run if it was done before and a corresponding log-file is found. --
 This part of the sequence can be run individually via `ts_test_custom_dev <TESTNAME>` and `ts_test_custom_ref <TESTNAME>`
 * Comparison of the resulting outputs (ref vs. dev). This part is defined in `test/<TESTNAME>_comp.sh`. It is not mandatory and is skipped automatically if the file does not exist. --
 This part of the sequence can be run individually via `ts_test_custom_comp <TESTNAME>`

@@ -250,11 +250,14 @@ function ts_test_custom_prep {
         _ts_env_ref
         ts_check_proxy
         cd $TS_DIR/projects/$TS_PROJECT_NAME/test
-        logandrun "bash $TS_DIR/test/${1}_prep.sh" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_prep.log
+        logandrun "bash $TS_DIR/test/${1}_prep.sh" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_prep
+        RETURN_CODE=$?
         _ts_env_dev
     else
         logwarn "No preparation task available for test ${1}. Skipping it..."
+        RETURN_CODE=99
     fi
+    return $RETURN_CODE
 }
 
 function ts_test_custom_ref {
@@ -267,12 +270,14 @@ function ts_test_custom_ref {
     if [[ -f $TS_DIR/test/${1}_test.sh ]]; then
         _ts_env_ref
         cd $TS_DIR/projects/$TS_PROJECT_NAME/test
-        logandrun "bash $TS_DIR/test/${1}_test.sh ref" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_ref.log
+        logandrun "bash $TS_DIR/test/${1}_test.sh ref" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_ref
+        RETURN_CODE=$?
         _ts_env_dev
     else
         logerror "Test $1 is not available!"
-        return 1
+        RETURN_CODE=1
     fi
+    return $RETURN_CODE
 }
 
 function ts_test_custom_dev {
@@ -285,13 +290,18 @@ function ts_test_custom_dev {
     if [[ -f $TS_DIR/test/${1}_test.sh ]]; then
         _ts_env_dev
         scram b -j 20
-        cd $TS_DIR/projects/$TS_PROJECT_NAME/test
-        logandrun "bash $TS_DIR/test/${1}_test.sh dev" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_dev.log
-        _ts_env_dev
+        RETURN_CODE=$?
+        if [[ $RETURN_CODE -eq 0 ]]; then
+            cd $TS_DIR/projects/$TS_PROJECT_NAME/test
+            logandrun "bash $TS_DIR/test/${1}_test.sh dev" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_dev
+            RETURN_CODE=$?
+            _ts_env_dev
+        fi
     else
         logerror "Test $1 is not available!"
-        return 1
+        RETURN_CODE=1
     fi
+    return $RETURN_CODE
 }
 
 function ts_test_custom_comp {
@@ -303,10 +313,13 @@ function ts_test_custom_comp {
     fi
     if [[ -f $TS_DIR/test/${1}_comp.sh ]]; then
         cd $TS_DIR/projects/$TS_PROJECT_NAME/test
-        logandrun "bash $TS_DIR/test/${1}_comp.sh" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_comp.log
+        logandrun "bash $TS_DIR/test/${1}_comp.sh" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_comp
+        RETURN_CODE=$?
     else
         logwarn "No comparison task available for test ${1}. Skipping it..."
+        RETURN_CODE=99
     fi
+    return $RETURN_CODE
 }
 
 function ts_test_custom {
@@ -316,14 +329,54 @@ function ts_test_custom {
         ts_list_custom_tests
         return 1
     fi
-    ts_test_custom_prep $1
+    if [[ -f $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_prep.log ]]; then
+        logwarn "Logfile of preparation already exists. Skipping production of input file."
+        PREP_CODE=98
+    else
+        ts_test_custom_prep $1
+        PREP_CODE=$?
+    fi
     ts_test_custom_dev $1
+    DEV_CODE=$?
     if [[ -f $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_ref.log ]]; then
-        logwarn "Logfile of reference already exists. Skipping reproduction of reference."
+        logwarn "Logfile of reference already exists. Skipping production of reference."
+        REF_CODE=98
     else
         ts_test_custom_ref $1
+        REF_CODE=$?
     fi
     ts_test_custom_comp $1
+    COMP_CODE=$?
+
+    loginfo "Summary:"
+    if [[ $PREP_CODE -eq 0 ]]; then
+        loginfo "- Preparation step done."
+    elif [[ $PREP_CODE -eq 98 ]]; then
+        logwarn "- Preparation step not run (Found log of earlier run)."
+    elif [[ $PREP_CODE -eq 99 ]]; then
+        logwarn	"- Preparation step not run (No preparation step defined)."
+    else
+        logerrormsg "- Preparation step had errors."
+    fi
+    if [[ $DEV_CODE -eq 0 ]]; then
+       	loginfo	"- Test step with development setup done."
+    else
+       	logerrormsg "- Test step with development setup had errors."
+    fi
+    if [[ $REF_CODE -eq 0 ]]; then
+       	loginfo	"- Test step with reference setup done."
+    elif [[ $REF_CODE -eq 98 ]]; then
+       	logwarn	"- Test step with reference setup not run (Found log of earlier run)."
+    else
+       	logerrormsg "- Test step with reference setup had errors."
+    fi
+    if [[ $COMP_CODE -eq 0 ]]; then
+       	loginfo	"- Comparison step done."
+    elif [[ $COMP_CODE -eq 99 ]]; then
+       	logwarn	"- Comparison not run (No comparison step defined)."
+    else
+       	logerrormsg "- Comparison had errors."
+    fi
 }
 
 function ts_rebase_to_master {
