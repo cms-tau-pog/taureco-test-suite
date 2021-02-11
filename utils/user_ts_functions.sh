@@ -283,6 +283,7 @@ function ts_test_custom_dev {
     fi
     if [[ -f $TS_DIR/test/${1}_test.sh ]]; then
         _ts_env_dev
+        scram b -j 20
         cd $TS_DIR/projects/$TS_PROJECT_NAME/test
         logandrun "bash $TS_DIR/test/${1}_test.sh dev" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_dev.log
         _ts_env_dev
