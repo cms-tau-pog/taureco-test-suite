@@ -175,13 +175,17 @@ function ts_check_proxy {
 function ts_test_code_checks {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
+    LOGTAG=$1
+    if [[ -z $LOGTAG ]]; then
+        LOGTAG=$(date +%Y-%m-%d_%H-%M)
+    fi
+
     scram b -j 20
     if [[ $? -ne 0 ]]; then
         logerror "Compilation failed!"
         return 1
     fi
-    scram b code-format
-    scram b code-checks
+    logandrun 'scram b code-format; scram b code-checks' $TS_DIR/projects/$TS_PROJECT_NAME/log/code-checks_${LOGTAG}
 }
 
 function ts_test_unit {
