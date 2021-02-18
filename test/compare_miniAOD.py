@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import time
 import os
 import argparse
 import yaml
@@ -63,7 +64,7 @@ def compare(quantity, input_dev, input_ref, tau_type, ranges, outdir, max_taus, 
     e_ref = Events(input_ref)
     tau_handle = Handle("std::vector<pat::Tau>")
     c1=ROOT.TCanvas()
-    r = [0, 1]
+    r = [0.0, 1.01]
     if quantity in ranges.keys():
         r = ranges[quantity]
     isID = False
@@ -90,7 +91,7 @@ def compare(quantity, input_dev, input_ref, tau_type, ranges, outdir, max_taus, 
                             break
                 h_ref.Fill(tau.tauIDs()[idxID].second)
             else:
-                h_ref.Fill(getattr(tau, quantity))
+                h_ref.Fill(getattr(tau, quantity)())
             max-=1
     max=max_taus
     for event in e_dev:
@@ -104,7 +105,7 @@ def compare(quantity, input_dev, input_ref, tau_type, ranges, outdir, max_taus, 
             if isID:
                 h_dev.Fill(tau.tauIDs()[idxID].second)
             else:
-                h_dev.Fill(getattr(tau, quantity))
+                h_dev.Fill(getattr(tau, quantity)())
             max-=1
 
     equal = True
@@ -124,21 +125,38 @@ def compare(quantity, input_dev, input_ref, tau_type, ranges, outdir, max_taus, 
     return equal
 
 def main(args):
-    ranges = yaml.load(open(os.path.join(os.getenv("TS_DIR"), "test/ranges.yaml")))
+    ranges = yaml.safe_load(open(os.path.join(os.getenv("TS_DIR"), "test/ranges.yaml")))
     outdir = os.path.join(os.getenv("TS_DIR"), "projects", os.getenv("TS_PROJECT_NAME"), "test") if args.outdir==None else args.outdir
     name = os.path.basename(args.input_ref.replace("_ref.root",""))
 
     results={}
+    failing_q=[]
     for q in args.quantities:
-        results[q] = compare(q, args.input_dev, args.input_ref, args.tau_type, ranges, outdir, args.max_taus, args.n_bins, name)
+        # Access to root histograms sometimes fails within the event loop. Usually works upon repetition.
+        for i in range(10):
+            try:
+                results[q] = compare(q, args.input_dev, args.input_ref, args.tau_type, ranges, outdir, args.max_taus, args.n_bins, name)
+                if q in failing_q:
+                    failing_q.remove(q)
+                    print "Comparison of %s finally worked!"%q
+                break
+            except TypeError:
+                failing_q.append(q)
+                print "Rerunning comparison of %s due to ROOT error!"%q
+            except AttributeError:
+                failing_q.append(q)
+                print "Rerunning comparison of %s due to ROOT error!"%q
     n_diffs=0
     print "___Summary___:"
     for	q in args.quantities:
-        if not results[q]:
-            print q, colored("DIFFERS", "red")
-            n_diffs += 1
+        if q in failing_q:
+            print q, colored("TECHNICAL ERROR", "red")
         else:
-            print q, colored("ok", "green")
+            if not results[q]:
+                print q, colored("DIFFERS", "red")
+                n_diffs += 1
+            else:
+                print q, colored("ok", "green")
     print ""
     if n_diffs==0:
         print colored("No differences found!", "green")
