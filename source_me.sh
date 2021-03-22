@@ -20,6 +20,7 @@ export TS_PROJECT_NAME=$1
 
 cd $(dirname "${BASH_SOURCE[0]}")
 export TS_DIR=$PWD
+export TS_DEFAULT_RELEASE_CYCLE=11_3_X
 
 #Load functions
 source utils/helper_functions.sh
@@ -63,7 +64,7 @@ else
         mkdir projects/$TS_PROJECT_NAME/log
         mkdir projects/$TS_PROJECT_NAME/test
 
-        export TS_CMSSW_BUILD=CMSSW_11_3_X_$(date -d "yesterday" +"%Y-%m-%d")-2300
+        export TS_CMSSW_BUILD=CMSSW_${TS_DEFAULT_RELEASE_CYCLE}_$(date -d "yesterday" +"%Y-%m-%d")-2300
         read -p "Please enter custom CMSSW build if required (default=${TS_CMSSW_BUILD}):" -r
         if [[ ! -z $REPLY ]]; then
             export TS_CMSSW_BUILD=$REPLY

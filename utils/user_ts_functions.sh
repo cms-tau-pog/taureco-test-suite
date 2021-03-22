@@ -124,10 +124,9 @@ function ts_checkout_new_cmssw_build {
 
     #set up new cmssw build
     OLD_TS_CMSSW_BUILD=$TS_CMSSW_BUILD
-    read -p "Please enter custom CMSSW build if required:" -r
-    if [[ -z $REPLY ]]; then
-        export TS_CMSSW_BUILD=CMSSW_11_1_X_$(date -d "yesterday" +"%Y-%m-%d")-2300
-    else
+    export TS_CMSSW_BUILD=CMSSW_${TS_DEFAULT_RELEASE_CYCLE}_$(date -d "yesterday" +"%Y-%m-%d")-2300
+    read -p "Please enter custom CMSSW build if required (default=${TS_CMSSW_BUILD}):" -r
+    if [[ ! -z $REPLY ]]; then
         export TS_CMSSW_BUILD=$REPLY
     fi
     _ts_setup_cmssw
@@ -143,13 +142,28 @@ function ts_checkout_new_cmssw_build {
     for PACKAGE in $TS_CMSSW_PACKAGES; do
         git cms-addpkg $PACKAGE
     done
+    git remote | grep $1 > /dev/null
+    if [[ $? -ne 0 ]]; then
+        git remote add $TS_CMSSW_REMOTE git@github.com:${TS_CMSSW_REMOTE}/cmssw.git
+    fi
+    logattn "Fetching contents from remote. Credentials required!"
+    git fetch $TS_CMSSW_REMOTE
+    if [[ $? -eq 0 ]]; then
+        git checkout --track $TS_CMSSW_REMOTE/$TS_CMSSW_BRANCH
+        if [[ $? -ne 0 ]]; then
+            logerror "Branch $TS_CMSSW_BRANCH not available on ${TS_CMSSW_REMOTE}! Use ts_set_branch to switch to a different branch."
+            export TS_CMSSW_BRANCH=INVALID
+        fi
+    else
+        logerror "Remote fork $TS_CMSSW_REMOTE is not available! Use ts_set_remote to switch to a different remote."
+        export TS_CMSSW_REMOTE=INVALID
+        export TS_CMSSW_BRANCH=INVALID
+    fi
 
     #copy local changes from old build
     cd $TS_DIR/projects/$TS_PROJECT_NAME/dev/$OLD_TS_CMSSW_BUILD/src
-    cmsenv
     git diff > .ts_transfer_to_${TS_CMSSW_BUILD}.diff
     cd $TS_DIR/projects/$TS_PROJECT_NAME/dev/$TS_CMSSW_BUILD/src
-    cmsenv
     git apply $TS_DIR/projects/$TS_PROJECT_NAME/dev/$OLD_TS_CMSSW_BUILD/src/.ts_transfer_to_${TS_CMSSW_BUILD}.diff
     unset OLD_TS_CMSSW_BUILD
 }
