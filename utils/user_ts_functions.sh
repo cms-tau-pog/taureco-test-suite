@@ -180,6 +180,7 @@ function ts_test_code_checks {
         LOGTAG=$(date +%Y-%m-%d_%H-%M)
     fi
 
+    _ts_env_dev
     scram b -j 20
     if [[ $? -ne 0 ]]; then
         logerror "Compilation failed!"
@@ -196,6 +197,7 @@ function ts_test_unit {
         LOGTAG=$(date +%Y-%m-%d_%H-%M)
     fi
 
+    _ts_env_dev
     scram b -j 20
     if [[ $? -ne 0 ]]; then
         logerror "Compilation failed!"
@@ -215,6 +217,7 @@ function ts_test_matrix {
     fi
 
     ts_check_proxy
+    _ts_env_dev
     scram b -j 20
     if [[ $? -ne 0 ]]; then
         logerror "Compilation failed!"
@@ -316,9 +319,11 @@ function ts_test_custom_comp {
         return 1
     fi
     if [[ -f $TS_DIR/test/${1}_comp.sh ]]; then
+        _ts_env_ref
         cd $TS_DIR/projects/$TS_PROJECT_NAME/test
         logandrun "bash $TS_DIR/test/${1}_comp.sh" $TS_DIR/projects/$TS_PROJECT_NAME/log/${1}_comp
         RETURN_CODE=$?
+        _ts_env_dev
     else
         logwarn "No comparison task available for test ${1}. Skipping it..."
         RETURN_CODE=99
