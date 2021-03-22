@@ -237,6 +237,7 @@ function ts_test_matrix {
         logerror "Compilation failed!"
         return 1
     fi
+    cd $TS_DIR/projects/$TS_PROJECT_NAME/test
     logandrun 'runTheMatrix.py -l limited -i all --ibeos' $TS_DIR/projects/$TS_PROJECT_NAME/log/matrix-tests_${LOGTAG}
     loginfo "Matrix tests finished. Please check results in $TS_DIR/projects/$TS_PROJECT_NAME/log/matrix-tests_${LOGTAG}.log"
 }
