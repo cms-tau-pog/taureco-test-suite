@@ -36,7 +36,7 @@ if [ -d projects/$TS_PROJECT_NAME ]; then
     cmsenv
     #workaround for checking that cmsenv works and build is not deprecated. (because it always returns 0)
     if [[ $TS_CMSSW_BUILD =~ 20[0-9][0-9]-[0-1][0-9]-[0-3][0-9]-[0-2][0-9]00 ]]; then
-        ls /cvmfs/cms-ib.cern.ch/week*/*/cms/cmssw*/$CMSSW_BUILD > /dev/null
+        ls /cvmfs/cms-ib.cern.ch/week*/*/cms/cmssw*/$TS_CMSSW_BUILD > /dev/null
         if [[ $? -ne 0 ]]; then
             logerror "Setting up CMSSW failed. Your current build is probably outdated (check above). If this is the case, you may want to run ts_checkout_new_cmssw_build in order to check out a new build and transfer your local developments."
         fi
