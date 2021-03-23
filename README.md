@@ -6,7 +6,7 @@ In order to create a new project, simply run:
 ```
 source source_me.sh <PROJECT>
 ```
-You will be asked for the CMSSW build to be used (latest nightly build by default), the packages to be added, the remote and branch to work on.
+You will be asked for the CMSSW build to be used (latest nightly build by default), the packages to be added, the remote (cms-tau-pog by default; you can enter a github team/account or `official-cmssw` which is provided by CMSSW from the very beginning) and branch to work on.
 The project is set up in `projects/<PROJECT>`.
 
 In order to resume work on a project from a new session or after working on a different project, simply run the same source command again. You will end up in the CMSSW environment of the project.
@@ -24,7 +24,7 @@ The provided user commands are listed after the sourcing. They all begin `ts_` s
 ## Manage builds, packages, branches, backports
 * `ts_checkout_new_cmssw_build` : Sets up another CMSSW build with the same configuration of packages and branches, then copies your local changes. Future test suite operations will run on the new build. The old build is kept. You can delete it by hand as soon as you are sure that everything is working well with the new build. -  This function is particularly useful if you are working with nightly builds that expire after some time.
 * `ts_add_package <SUBSYSTEM/PACKAGE>` : Add a new CMSSW package to the project.
-* `ts_set_remote <GITHUBREMOTE>` : Set the project remote and fetch it.
+* `ts_set_remote <GITHUBREMOTE>` : Set the project remote and fetch it. The command takes the name of a locally present git remote or a github team/account.
 * `ts_set_remote <BRANCH>` : Set the project branch. If the branch already exists locally, git checks out this one, otherwise it tries to get it from the project remote.
 * `ts_rebase_to_master` : Fetch CMSSW master and rebase current branch to it, which might be necessary for avoiding merge conflicts. The inclusion of recent commits from master may cause compilation failures in your current setup. In this case you can use `ts_checkout_new_cmssw_build` to switch to the latest nightly build.
 * `ts_backport` : Creates a new project in order to prepare a backport branch. You will be asked for the CMSSW release that you want to reside on. The backport project is set up with the same other settings as the original projects. A backport branch is created and the commits from the original development are automatically cherry-picked. You might have to resolve merge conflicts by hand.
