@@ -103,6 +103,31 @@ function ts_set_branch {
     _ts_save_metadata
 }
 
+function ts_new_branch {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+
+    if [[ -z $1 ]]; then
+        logattn "Call me with branch name!"
+        return 1
+    fi
+
+    _ts_env_dev
+    git branch | grep $1 > /dev/null
+    if [[ $? -eq 0 ]]; then
+        logerror "Branch $1 already exists. Use ts_set_branch if you want to check it out. Aborting branch creation..."
+    else
+        read -p "Please enter new remote if applicable (current remote: ${TS_CMSSW_REMOTE}):" -r
+        if [[ ! -z $REPLY ]]; then
+            ts_set_remote $REPLY
+        fi
+        export TS_CMSSW_BRANCH=$1
+        git checkout -b $TS_CMSSW_BRANCH
+        logattn "Pushing new branch to remote. Credentials required!"
+        git push -u $TS_CMSSW_REMOTE $TS_CMSSW_BRANCH
+        _ts_save_metadata
+    fi
+}
+
 function ts_add_package {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
