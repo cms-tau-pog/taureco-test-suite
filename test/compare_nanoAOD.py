@@ -8,7 +8,6 @@ import yaml
 
 from termcolor import colored
 
-from DataFormats.FWLite import Handle, Events
 import ROOT
 
 ROOT.gROOT.SetBatch()
@@ -47,11 +46,6 @@ def parse_arguments():
         default=[],
         help="List of quantities to compare. Prepend 'id:' to ID quantities.")
     parser.add_argument(
-        "--tau-type",
-        type=str,
-        default="slimmedTaus",
-        help="Type of taus in compared samples. Default: %(default)s")
-    parser.add_argument(
         "-o",
         "--outdir",
         type=str,
@@ -59,53 +53,40 @@ def parse_arguments():
 
     return parser.parse_args()
 
-def compare(quantity, input_dev, input_ref, tau_type, ranges, outdir, max_taus, nbins, name):
-    e_dev = Events(input_dev)
-    e_ref = Events(input_ref)
-    tau_handle = Handle("std::vector<pat::Tau>")
+def compare(quantity, input_dev, input_ref, ranges, outdir, max_taus, nbins, name):
+    f_dev = ROOT.TFile(input_dev, "READ")
+    f_ref = ROOT.TFile(input_ref, "READ")
+    e_dev = f_dev.Get("Events")
+    e_ref = f_ref.Get("Events")
     c1=ROOT.TCanvas()
     r = [0.0, 1.01]
-    if quantity.replace("id:", "") in ranges.keys():
-        r = ranges[quantity.replace("id:", "")]
-    isID = False
-    idxID = -1
-    if quantity.startswith("id:"):
-        isID = True
-        quantity = quantity.replace("id:", "")
+    if quantity.split(":")[0] in ranges.keys():
+        r = ranges[quantity.split(":")[0]]
     h_ref = ROOT.TH1F(quantity, quantity, nbins, r[0], r[1])
     h_dev = ROOT.TH1F(quantity+"_dev", quantity+"_dev", nbins, r[0], r[1])
     max=max_taus
     for event in e_ref:
         if max==0:
             break
-        event.getByLabel(tau_type, tau_handle)
-        taus = tau_handle.product()
+        taus = list(getattr(event, "Tau_"+quantity.split(":")[0]))
         for tau in taus:
             if max==0:
                 break
-            if isID:
-                if idxID==-1:
-                    for i, ID in enumerate(tau.tauIDs()):
-                        if ID.first==quantity:
-                            idxID = i
-                            break
-                h_ref.Fill(tau.tauIDs()[idxID].second)
-            else:
-                h_ref.Fill(getattr(tau, quantity)())
+            if ":" in quantity:
+                tau = min(1, tau & 1 << int(quantity.split(":")[1]) - 1) #name provides nth bit (without 0) according to bitmask documented in nanoAOD tree
+            h_ref.Fill(tau)
             max-=1
     max=max_taus
     for event in e_dev:
         if max==0:
             break
-        event.getByLabel(tau_type, tau_handle)
-        taus = tau_handle.product()
+        taus = list(getattr(event, "Tau_"+quantity.split(":")[0]))
         for tau in taus:
             if max==0:
                 break
-            if isID:
-                h_dev.Fill(tau.tauIDs()[idxID].second)
-            else:
-                h_dev.Fill(getattr(tau, quantity)())
+            if ":" in quantity:
+                tau = min(1, tau & 1 << int(quantity.split(":")[1]) - 1) #name provides nth bit (without 0) according to bitmask documented in nanoAOD tree
+            h_dev.Fill(tau)
             max-=1
 
     equal = True
@@ -122,6 +103,9 @@ def compare(quantity, input_dev, input_ref, tau_type, ranges, outdir, max_taus, 
     h_dev.Draw("histsame")
     c1.SaveAs(os.path.join(outdir, "%s_%s.png"%(name, quantity)))
 
+    f_dev.Close()
+    f_ref.Close()
+
     return equal
 
 def main(args):
@@ -135,7 +119,7 @@ def main(args):
         # Access to root histograms sometimes fails within the event loop. Usually works upon repetition.
         for i in range(10):
             try:
-                results[q] = compare(q, args.input_dev, args.input_ref, args.tau_type, ranges, outdir, args.max_taus, args.n_bins, name)
+                results[q] = compare(q, args.input_dev, args.input_ref, ranges, outdir, args.max_taus, args.n_bins, name)
                 if q in failing_q:
                     failing_q.remove(q)
                     print "Comparison of %s finally worked!"%q

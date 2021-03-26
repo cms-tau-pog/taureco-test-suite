@@ -4,15 +4,20 @@ phi : [-3.14, 3.14]
 mass : [0.0, 2.0]
 mt : [0.0, 100.0]
 decayMode : [0.0, 12.0]
-id:chargedIsoPtSum : [0.0, 100.0]
-id:neutralIsoPtSum : [0.0, 100.0]
-id:neutralIsoPtSumWeight : [0.0, 100.0]
-id:footprintCorrection : [0.0, 10.0]
-id:photonPtSumOutsideSignalCone : [0.0, 20.0]
-id:puCorrPtSum : [0.0, 50.0]
-id:chargedIsoPtSumdR03 : [0.0, 100.0]
-id:footprintCorrectiondR03 : [0.0, 10.0]
-id:neutralIsoPtSumWeightdR03 : [0.0, 100.0]
-id:neutralIsoPtSumdR03 : [0.0, 100.0]
-id:photonPtSumOutsideSignalConedR03 : [0.0, 20.0]
-id:byCombinedIsolationDeltaBetaCorrRaw3Hits : [0.0, 100.0]
+chargedIsoPtSum : [0.0, 100.0]                            #_/miniAOD
+chargedIso : [0.0, 100.0]                                 # \nanoAOD
+neutralIsoPtSum : [0.0, 100.0]                            #_/miniAOD
+neutralIso : [0.0, 100.0]                                 # \nanoAOD
+neutralIsoPtSumWeight : [0.0, 100.0]
+footprintCorrection : [0.0, 10.0]
+photonPtSumOutsideSignalCone : [0.0, 20.0]                #_/miniAOD
+photonsOutsideSignalCone : [0.0, 20.0]                    # \nanoAOD
+puCorrPtSum : [0.0, 50.0]                                 #_/miniAOD
+puCorr : [0.0, 50.0]                                      # \nanoAOD
+chargedIsoPtSumdR03 : [0.0, 100.0]
+footprintCorrectiondR03 : [0.0, 10.0]
+neutralIsoPtSumWeightdR03 : [0.0, 100.0]
+neutralIsoPtSumdR03 : [0.0, 100.0]
+photonPtSumOutsideSignalConedR03 : [0.0, 20.0]
+byCombinedIsolationDeltaBetaCorrRaw3Hits : [0.0, 100.0]   #_/miniAOD
+rawIso : [0.0, 100.0]                                     # \nanoAOD
