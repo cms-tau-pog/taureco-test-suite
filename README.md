@@ -19,6 +19,8 @@ The provided user commands are listed after the sourcing. They all begin `ts_` s
 * `ts_go_to_top` : cd to test suite base directory.
 * `ts_go_to_dev` : cd to development CMSSW src directory.
 * `ts_go_to_ref` : cd to reference CMSSW src directory.
+* `ts_go_to_test` : cd to project test directory.
+* `ts_go_to_log` : cd to project log directory.
 * `ts_delete` : Remove the current project.
 
 ## Manage builds, packages, branches, backports

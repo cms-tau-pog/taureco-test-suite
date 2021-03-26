@@ -25,6 +25,16 @@ function ts_go_to_ref {
     cd $TS_DIR/projects/$TS_PROJECT_NAME/ref/$TS_CMSSW_BUILD/src
 }
 
+function ts_go_to_test {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    cd $TS_DIR/projects/$TS_PROJECT_NAME/test
+}
+
+function ts_go_to_log {
+    ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
+    cd $TS_DIR/projects/$TS_PROJECT_NAME/log
+}
+
 function ts_delete {
     ts_active_project quiet; PROJECTOK=$?; if [[ $PROJECTOK -ne 0 ]]; then return $PROJECTOK; fi
 
