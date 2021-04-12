@@ -81,7 +81,7 @@ function ts_set_remote {
         git remote add $1 git@github.com:${1}/cmssw.git
     fi
     logattn "Fetching contents from remote. Credentials required!"
-    git fetch $TS_CMSSW_REMOTE
+    git fetch $1
     if [[ $? -ne 0 ]]; then
         logerror "Remote fork $1 is not available! Use ts_set_remote to switch to a different remote."
         return 1
