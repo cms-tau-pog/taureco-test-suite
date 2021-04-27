@@ -50,10 +50,15 @@ def parse_arguments():
         "--outdir",
         type=str,
         help="Input file from reference.")
+    parser.add_argument(
+        "--tau-type",
+        type=str,
+        default="Tau",
+        help="Type of taus in compared samples. Default: %(default)s")
 
     return parser.parse_args()
 
-def compare(quantity, input_dev, input_ref, ranges, outdir, max_taus, nbins, name):
+def compare(quantity, input_dev, input_ref, ranges, outdir, max_taus, nbins, name, tau_type):
     f_dev = ROOT.TFile(input_dev, "READ")
     f_ref = ROOT.TFile(input_ref, "READ")
     e_dev = f_dev.Get("Events")
@@ -68,7 +73,7 @@ def compare(quantity, input_dev, input_ref, ranges, outdir, max_taus, nbins, nam
     for event in e_ref:
         if max==0:
             break
-        taus = list(getattr(event, "Tau_"+quantity.split(":")[0]))
+        taus = list(getattr(event, tau_type+"_"+quantity.split(":")[0]))
         for tau in taus:
             if max==0:
                 break
@@ -80,7 +85,7 @@ def compare(quantity, input_dev, input_ref, ranges, outdir, max_taus, nbins, nam
     for event in e_dev:
         if max==0:
             break
-        taus = list(getattr(event, "Tau_"+quantity.split(":")[0]))
+        taus = list(getattr(event, tau_type+"_"+quantity.split(":")[0]))
         for tau in taus:
             if max==0:
                 break
@@ -119,7 +124,7 @@ def main(args):
         # Access to root histograms sometimes fails within the event loop. Usually works upon repetition.
         for i in range(10):
             try:
-                results[q] = compare(q, args.input_dev, args.input_ref, ranges, outdir, args.max_taus, args.n_bins, name)
+                results[q] = compare(q, args.input_dev, args.input_ref, ranges, outdir, args.max_taus, args.n_bins, name, args.tau_type)
                 if q in failing_q:
                     failing_q.remove(q)
                     print "Comparison of %s finally worked!"%q
