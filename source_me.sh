@@ -20,7 +20,7 @@ export TS_PROJECT_NAME=$1
 
 cd $(dirname "${BASH_SOURCE[0]}")
 export TS_DIR=$PWD
-export TS_DEFAULT_RELEASE_CYCLE=11_3_X
+export TS_DEFAULT_RELEASE_CYCLE=12_0_X
 
 #Load functions
 source utils/helper_functions.sh
